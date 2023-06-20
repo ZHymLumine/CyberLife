@@ -1,6 +1,6 @@
 from waifu.llm.Brain import Brain
-#from waifu.llm.VectorDB import VectorDB
-#from waifu.llm.SentenceTransformer import STEmbedding
+from waifu.llm.VectorDB import VectorDB
+from waifu.llm.SentenceTransformer import STEmbedding
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from typing import Any, List, Mapping, Optional
@@ -20,9 +20,9 @@ class GPT(Brain):
                         callbacks=[callback],
                         temperature=0.85)
         self.llm_nonstream = ChatOpenAI(openai_api_key=api_key, model_name=model)
-        #self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
-        # self.embedding = STEmbedding()
-        #self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
+        self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
+        self.embedding = STEmbedding()
+        self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
         if proxy != '':
             openai.proxy = proxy
 
@@ -36,12 +36,10 @@ class GPT(Brain):
 
 
     def store_memory(self, text: str | list):
-        '''保存记忆 embedding'''
-        #self.vectordb.store(text)
-        pass
+        '''savem emory embedding'''
+        self.vectordb.store(text)
 
 
     def extract_memory(self, text: str, top_n: int = 10):
-        '''提取 top_n 条相关记忆'''
-        #return self.vectordb.query(text, top_n)
-        pass
+        '''extract top_n memories'''
+        return self.vectordb.query(text, top_n)

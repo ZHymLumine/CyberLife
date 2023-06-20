@@ -1,3 +1,5 @@
 __pycache__
 .vscode
 config.ini
+st_model/
+memory/*.json
