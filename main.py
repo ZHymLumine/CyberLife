@@ -21,7 +21,6 @@ from langchain.schema import (
 import time 
 import logging
 import os
-from playsound import playsound
 from pydub import AudioSegment
 from pydub.playback import play
 
@@ -29,9 +28,9 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 log_file_path = './LOG/waifu.log'
 if not os.path.exists(log_file_path):
     with open(log_file_path, 'w') as f:
-        print('log file created.')
+        f.write('log file created. %' % (time.time()))
 else:
-    print('log already exists.')
+    pass
 
 logging.basicConfig(level=logging.INFO, filename='./LOG/waifu.log')
 logging.info("This is an info message.")
@@ -113,36 +112,23 @@ while not stop :
         logging.info(f'发送信息: {reply}')
     if send_voice:
         emotion = waifu.analyze_emotion(reply)
+        print(emotion)
         tts.speak(reply, emotion)
-        file_path = './output.mp3'
+        file_path = './output.wav'
+        if use_emotion:
+            file_path = './output.wav'
+            audio = AudioSegment.from_file(file_path, "wav")
+        else:
+            file_path = './output.mp3'
+            audio = AudioSegment.from_file(file_path, "mp3")
         abs_path = os.path.abspath(file_path)
-        mp3_audio = AudioSegment.from_file(abs_path, format="mp3")
-        play(mp3_audio)
+        #audio = AudioSegment.from_wav(file_path)
+        play(audio)
         mtime = os.path.getmtime(file_path)
         local_time = time.localtime(mtime)
         time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
         #message.sender.send_message("%s" % record(file='file:///' + abs_path))
         logging.info(f'发送语音({emotion} {time_str}): {reply}')
-    sentences = divede_sentences(reply)
-    # for st in sentences:
-    #     time.sleep(0.5)
-    #     if st == '' or st == ' ':
-    #         continue
-    #     if send_text:
-    #         logging.info(f'发送信息: {st}')
-    #     if send_voice:
-    #         emotion = waifu.analyze_emotion(st)
-    #         tts.speak(st, emotion)
-    #         file_path = './output.wav'
-    #         abs_path = os.path.abspath(file_path)
-    #         wave_obj = sa.WaveObject.from_wave_file(abs_path)
-    #         play_obj = wave_obj.play()
-    #         play_obj.wait_done()  
-    #         mtime = os.path.getmtime(file_path)
-    #         local_time = time.localtime(mtime)
-    #         time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
-    #         #message.sender.send_message("%s" % record(file='file:///' + abs_path))
-    #         logging.info(f'发送语音({emotion} {time_str}): {st}')
     waifu.finish_ask(reply)
 
 waifu.summarize_memory()

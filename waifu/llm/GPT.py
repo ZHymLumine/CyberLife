@@ -41,5 +41,5 @@ class GPT(Brain):
 
 
     def extract_memory(self, text: str, top_n: int = 10):
-        '''extract top_n memories'''
+        '''extract top_n memori'''
         return self.vectordb.query(text, top_n)

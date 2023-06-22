@@ -24,7 +24,7 @@ def speak(text: str, voice: str, description: str):
                     break
             break
     if api == '':
-        communicate = edge_tts.Communicate(text=text, voice=voice, rate='+8%')
-        asyncio.run(communicate.save('output.mp3'))
+        communicate = edge_tts.Communicate(text=text, voice=voice, rate='+7%')
+        asyncio.run(communicate.save('output.wav'))
     else:
         azure_speak(text, voice, style, api, region)
