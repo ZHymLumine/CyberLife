@@ -2,7 +2,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 from typing import Any, Dict, List, Union
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 from waifu.Tools import get_first_sentence
-from pycqBot.cqCode import image, record
+#from pycqBot.cqCode import image, record
 from waifu.Waifu import Waifu
 from tts.TTS import TTS
 import os
@@ -49,7 +49,7 @@ class WaifuCallback(BaseCallbackHandler):
                 mtime = os.path.getmtime(file_path)
                 local_time = time.localtime(mtime)
                 time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
-                self.sender.send_message("%s" % record(file='file:///' + abs_path))
+                #self.sender.send_message("%s" % record(file='file:///' + abs_path))
                 logging.info(f'发送语音({emotion} {time_str}): {sentence}')
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
@@ -72,7 +72,7 @@ class WaifuCallback(BaseCallbackHandler):
         if not file_name == '':
             file_path = './presets/emoticon/' + file_name
             abs_path = os.path.abspath(file_path)
-            self.sender.send_message("%s" % image(file='file:///' + abs_path))
+            #self.sender.send_message("%s" % image(file='file:///' + abs_path))
 
     def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any

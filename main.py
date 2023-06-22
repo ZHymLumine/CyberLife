@@ -1,9 +1,11 @@
 import configparser
 from waifu.Waifu import Waifu
-#from waifu.StreamCallback import WaifuCallback
+from waifu.StreamCallback import WaifuCallback
 from waifu.llm.GPT import GPT
 from waifu.llm.Claude import Claude
-from waifu.Tools import load_prompt, load_emoticon, load_memory, str2bool
+from waifu.Tools import load_prompt, load_emoticon, load_memory, str2bool, divede_sentences
+from tts.TTS import TTS
+from tts.edge.edge import speak
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -16,6 +18,24 @@ from langchain.schema import (
     HumanMessage,
     SystemMessage
 )
+import time 
+import logging
+import os
+from playsound import playsound
+from pydub import AudioSegment
+from pydub.playback import play
+
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
+log_file_path = './LOG/waifu.log'
+if not os.path.exists(log_file_path):
+    with open(log_file_path, 'w') as f:
+        print('log file created.')
+else:
+    print('log already exists.')
+
+logging.basicConfig(level=logging.INFO, filename='./LOG/waifu.log')
+logging.info("This is an info message.")
+
 
 config = configparser.ConfigParser()
 
@@ -38,6 +58,15 @@ search_api	 = config['Thoughts_GoogleSerperAPI']['search_api']
 voice 		 = config['TTS']['voice']
 
 prompt = load_prompt(charactor)
+
+# 语音配置
+tts_model = config['TTS']['model']
+if tts_model == 'Edge':
+	tts = TTS(speak, voice)
+	api = config['TTS_Edge']['azure_speech_key']
+	if api == '':
+		use_emotion = False
+
 
 # LLM 模型配置
 model = config['LLM']['model']
@@ -77,8 +106,44 @@ while not stop :
     if len(content) == 1 and content[0] == 'q':
         stop = True
         break
+
     reply = waifu.ask(content)
+ 
+    if send_text:
+        logging.info(f'发送信息: {reply}')
+    if send_voice:
+        emotion = waifu.analyze_emotion(reply)
+        tts.speak(reply, emotion)
+        file_path = './output.mp3'
+        abs_path = os.path.abspath(file_path)
+        mp3_audio = AudioSegment.from_file(abs_path, format="mp3")
+        play(mp3_audio)
+        mtime = os.path.getmtime(file_path)
+        local_time = time.localtime(mtime)
+        time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+        #message.sender.send_message("%s" % record(file='file:///' + abs_path))
+        logging.info(f'发送语音({emotion} {time_str}): {reply}')
+    sentences = divede_sentences(reply)
+    # for st in sentences:
+    #     time.sleep(0.5)
+    #     if st == '' or st == ' ':
+    #         continue
+    #     if send_text:
+    #         logging.info(f'发送信息: {st}')
+    #     if send_voice:
+    #         emotion = waifu.analyze_emotion(st)
+    #         tts.speak(st, emotion)
+    #         file_path = './output.wav'
+    #         abs_path = os.path.abspath(file_path)
+    #         wave_obj = sa.WaveObject.from_wave_file(abs_path)
+    #         play_obj = wave_obj.play()
+    #         play_obj.wait_done()  
+    #         mtime = os.path.getmtime(file_path)
+    #         local_time = time.localtime(mtime)
+    #         time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+    #         #message.sender.send_message("%s" % record(file='file:///' + abs_path))
+    #         logging.info(f'发送语音({emotion} {time_str}): {st}')
     waifu.finish_ask(reply)
-    
+
 waifu.summarize_memory()
 print("Bye bye!")

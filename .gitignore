@@ -2,4 +2,9 @@ __pycache__
 .vscode
 config.ini
 st_model/
-memory/*.json
+memory/
+presets/emoticon
+try.py 
+demo.py
+/LOG
+*.mp3

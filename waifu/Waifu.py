@@ -9,7 +9,7 @@ from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.memory import ChatMessageHistory
 import logging
 
-os.environ["TOKENIZERS_PARALLELISM"] = "true"
+
 
 class Waifu():
     '''CyberWaifu'''
