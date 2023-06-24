@@ -1,5 +1,5 @@
 # CyberLife
-![cover](assets/cover.jpg)
+![cover](assets/cover.png)
 
 <p align="center">
   <a href="https://github.com/ZHymLumine/CyberLife/stargazers"><img src="https://img.shields.io/github/stars/ZHymLumine/CyberLife?color=cd7373&amp;logo=github&amp;style=for-the-badge" alt="Github stars"></a>
