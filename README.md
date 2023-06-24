@@ -2,7 +2,7 @@
 ![cover](assets/cover.jpg)
 
 <p align="center">
-  <a href="https://github.com/ZHymLumine/CyberLife/stargazers"><img src="https://img.shields.io/github/stars/Syan-Lin/CyberWaifu?color=cd7373&amp;logo=github&amp;style=for-the-badge" alt="Github stars"></a>
+  <a href="https://github.com/ZHymLumine/CyberLife/stargazers"><img src="https://img.shields.io/github/stars/ZHymLumine/CyberLife?color=cd7373&amp;logo=github&amp;style=for-the-badge" alt="Github stars"></a>
   <img src="https://img.shields.io/badge/Python-3.10.10-blue?style=for-the-badge&logo=Python&logoColor=white&color=cd7373" alt="Python">
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/Syan-Lin/CyberWaifu?&amp;color=cd7373&amp;style=for-the-badge" alt="License"></a>
 </p>
