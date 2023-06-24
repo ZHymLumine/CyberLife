@@ -10,6 +10,8 @@
 
 ---
 
+## [Chinese](README.md)
+
 ### Introduction🔎
 
 CyberLife is a chatbot implemented using LLM (Language Learning Model) and TTS (Text-to-Speech), exploring authentic chat experiences.
