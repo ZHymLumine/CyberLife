@@ -64,8 +64,16 @@ pip install -r requirements.txt
 ```
 
 #### ffmpeg 安装
-为了支持任意格式的语音发送，按照 go-cqhttp 要求，需要 [下载ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z) 解压到 `qqbot/ffmpeg` 文件夹中（如果不存在请自行创建）
+为了支持任意格式的语音发送需安装ffmpeg
 
+Mac: [Install ffmpeg on Mac OSX](https://macappstore.org/ffmpeg/) 或直接在terminal执行
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+brew install ffmpeg
+```
+
+Windows: [Download FFmpeg](https://ffmpeg.org/download.html#build-windows)
 
 #### 记忆数据库向量计算模型
 为了支持本地的文本向量计算，需要引入 text embedding 模型，这里使用 [Sentence Transformer](https://github.com/UKPLab/sentence-transformers)
