@@ -8,23 +8,27 @@ from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.memory import ChatMessageHistory
 import logging
-
+import requests
+import hashlib
 
 
 class Waifu():
     '''CyberWaifu'''
 
     def __init__(self,
-                 brain: Brain,
-                 prompt: str,
-                 name: str,
-                 username: str,
-                 use_search: bool = False,
-                 search_api: str = '',
-                 use_emotion: bool = False,
-                 use_emoji: bool = True,
-                 use_qqface: bool = False,
-                 use_emoticon: bool = True):
+                brain: Brain,
+                prompt: str,
+                name: str,
+                username: str,
+                use_search: bool = False,
+                search_api: str = '',
+                use_emotion: bool = False,
+                use_emoji: bool = True,
+                use_qqface: bool = False,
+                use_emoticon: bool = True,
+                use_pinecone: bool = False,
+                translate_appid: str = '',
+                translate_secretKey: str = ''):
         self.brain = brain
         self.name = name
         self.username = username
@@ -38,6 +42,10 @@ class Waifu():
         self.use_search = use_search
         self.use_qqface = use_qqface
         self.use_emotion = use_emotion
+        self.use_pinecone = use_pinecone
+        self.appid = translate_appid
+        self.secret_key = translate_secretKey
+
         if use_emoji:
             self.emoji = waifu.Thoughts.AddEmoji(self.brain)
         if use_emoticon:
@@ -240,8 +248,44 @@ class Waifu():
         CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS:"""
         print('开始总结')
         summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
+        if self.use_pinecone:
+            #summary = self.translate2english(summary) # pinecone only support ASCII for id field
+            summary = self.translate(summary, 'zh', 'en', self.appid, self.secret_key)
         print('结束总结')
         while len(self.chat_memory.messages) > 4:
             self.cut_memory()
         self.save_memory_dataset(summary)
-        logging.info(f'总结记忆: {summary}')
+        logging.info(f'总结记忆 : {summary}')
+    
+    
+    def translate(self, query:str, from_lang:str, to_lang:str, appid:str, secret_key:str):
+        base_url = "https://fanyi-api.baidu.com/api/trans/vip/translate"
+        salt = "1435660288"
+        sign = appid + query + str(salt) + secret_key
+        sign = hashlib.md5(sign.encode()).hexdigest()
+
+        params = {
+            "q": query,
+            "from": from_lang,
+            "to": to_lang,
+            "appid": appid,
+            "salt": salt,
+            "sign": sign
+        }
+
+        response = requests.get(base_url, params=params).json()
+
+
+        return response['trans_result'][-1]['dst']
+
+    def translate2english(self, summary:str):
+        prompt = summary
+        prompt_template = f"""Translate following sentences into English:
+
+        ''
+        {prompt}
+        ''
+        CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS:"""
+        summary_EN = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
+        print("summary_en", summary_EN)
+        return summary_EN

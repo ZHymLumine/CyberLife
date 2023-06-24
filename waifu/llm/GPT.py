@@ -1,5 +1,6 @@
 from waifu.llm.Brain import Brain
 from waifu.llm.VectorDB import VectorDB
+from waifu.llm.SimpleDB import SimpleDB
 from waifu.llm.SentenceTransformer import STEmbedding
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
@@ -13,7 +14,9 @@ class GPT(Brain):
                  stream: bool=False,
                  callback=None,
                  model: str='gpt-3.5-turbo',
-                 proxy: str=''):
+                 proxy: str='',
+                 vectorDB_api: str='',
+                 vectorDB_env: str=''):
         self.llm = ChatOpenAI(openai_api_key=api_key,
                         model_name=model,
                         streaming=stream,
@@ -22,7 +25,11 @@ class GPT(Brain):
         self.llm_nonstream = ChatOpenAI(openai_api_key=api_key, model_name=model)
         self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
         self.embedding = STEmbedding()
-        self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
+        if (vectorDB_api == ''):
+            self.vectordb = SimpleDB(self.embedding, f'./memory/{name}.csv')
+        else:
+            self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv', vectorDB_api, vectorDB_env)
+        
         if proxy != '':
             openai.proxy = proxy
 

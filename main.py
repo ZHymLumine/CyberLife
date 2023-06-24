@@ -53,8 +53,22 @@ use_qqface   = str2bool(config['Thoughts']['use_qqface'])
 use_emoticon = str2bool(config['Thoughts']['use_emoticon'])
 use_search 	 = str2bool(config['Thoughts']['use_search'])
 use_emotion  = str2bool(config['Thoughts']['use_emotion'])
+use_pinecone = False
 search_api	 = config['Thoughts_GoogleSerperAPI']['search_api']
 voice 		 = config['TTS']['voice']
+pinecone_api = config['PINECONE']['api']
+pinecone_env = config['PINECONE']['environment']
+translate_platform = config['Translate']['platform']
+if translate_platform == 'Baidu':
+     baidu_appid = config['Translate_Baidu']['baidu_appid']
+     baidu_secretKey = config['Translate_Baidu']['baidu_secretKey']
+    
+
+if pinecone_api != '':
+    use_pinecone = True
+
+use_pinecone = False
+pinecone_api = ''
 
 prompt = load_prompt(charactor)
 
@@ -73,7 +87,7 @@ if model == 'OpenAI':
     openai_api = config['LLM_OpenAI']['openai_key']
     #callback = WaifuCallback(tts, send_text, send_voice)
     callback=StreamingStdOutCallbackHandler()
-    brain = GPT(openai_api, name, stream=True, callback=callback)
+    brain = GPT(openai_api, name, stream=True, callback=callback, vectorDB_api=pinecone_api, vectorDB_env=pinecone_env)
 elif model == 'Claude':
 	callback = None
 	user_oauth_token = config['LLM_Claude']['user_oauth_token']
@@ -89,7 +103,10 @@ waifu = Waifu(brain=brain,
 				use_emoji=use_emoji,
 				use_qqface=use_qqface,
                 use_emotion=use_emotion,
-				use_emoticon=use_emoticon)
+				use_emoticon=use_emoticon,
+                use_pinecone=use_pinecone,
+                translate_appid=baidu_appid,
+                translate_secretKey=baidu_secretKey)
 
 # load memory
 filename = config['CyberWaifu']['memory']
@@ -100,6 +117,7 @@ if filename != '':
         
 
 stop = False
+send_voice = False
 while not stop :
     content = input("You: ")
     if len(content) == 1 and content[0] == 'q':

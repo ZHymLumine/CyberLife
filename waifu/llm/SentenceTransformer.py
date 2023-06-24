@@ -18,4 +18,4 @@ class STEmbedding():
 
 
     def embed_query(self, text: str):
-        return self.model.encode(text).tolist()
+        return self.model.encode(text, show_progress_bar=False).tolist()
