@@ -3,7 +3,7 @@ from waifu.Waifu import Waifu
 from waifu.StreamCallback import WaifuCallback
 from waifu.llm.GPT import GPT
 from waifu.llm.Claude import Claude
-from waifu.Tools import load_prompt, load_emoticon, load_memory, str2bool, divede_sentences
+from waifu.Tools import load_prompt, load_emoticon, load_memory, str2bool, divede_sentences, translate
 from tts.TTS import TTS
 from tts.edge.edge import speak
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -49,12 +49,12 @@ username     = config['CyberWaifu']['username']
 charactor 	 = config['CyberWaifu']['charactor']
 send_text    = str2bool(config['CyberWaifu']['send_text'])
 send_voice   = str2bool(config['CyberWaifu']['send_voice'])
+input_voice  = str2bool(config['CyberWaifu']['input_voice'])
 use_emoji 	 = str2bool(config['Thoughts']['use_emoji'])
 use_qqface   = str2bool(config['Thoughts']['use_qqface'])
 use_emoticon = str2bool(config['Thoughts']['use_emoticon'])
 use_search 	 = str2bool(config['Thoughts']['use_search'])
 use_emotion  = str2bool(config['Thoughts']['use_emotion'])
-use_pinecone = False
 search_api	 = config['Thoughts_GoogleSerperAPI']['search_api']
 voice 		 = config['TTS']['voice']
 pinecone_api = config['PINECONE']['api']
@@ -69,8 +69,8 @@ if translate_platform == 'Baidu':
 if pinecone_api != '':
     use_pinecone = True
 
-use_pinecone = False
-pinecone_api = ''
+# use_pinecone = False
+# pinecone_api = ''
 
 prompt = load_prompt(charactor)
 
@@ -82,8 +82,15 @@ if tts_model == 'Edge':
 	if api == '':
 		use_emotion = False
 
+#-----------for debugging---------#
+tts_model = ''
+
+
+# vits configuration
 vits_model = config['TTS_Vits']['model']
+# speakerID = int(config['TTS_Vits']['speaker'])
 speaker = config['TTS_Vits']['speaker']
+language = config['TTS_Vits']['language']
 
 # LLM 模型配置
 model = config['LLM']['model']
@@ -118,12 +125,14 @@ if filename != '':
 	memory = load_memory(filename, waifu.name)
 	waifu.import_memory_dataset(memory)
         
-        
-
 stop = False
 #send_voice = False
 while not stop :
-    content = input("You: ")
+    if input_voice:
+        content = input("Please Speak: ")
+    else:
+        content = input("Please type. You: ")
+
     if len(content) == 1 and content[0] == 'q':
         stop = True
         break
@@ -138,14 +147,19 @@ while not stop :
 
         # tts
         if tts_model != '':
-            print("tts is speaking")
+            # print("tts is speaking")
             tts.speak(reply, emotion)
 
         # vits
         if vits_model != '':
-            print('vits is speaking')
-            text = '[ZH]' + reply + '[ZH]'
-            generateSound(text, play)
+            # print('vits is speaking')
+            text = reply
+            if language == 'Chinese':
+                text = '[ZH]' + reply + '[ZH]'
+            elif language == 'Japanese':
+                text = translate(text, 'zh', 'jp', appid=baidu_appid, secret_key=baidu_secretKey)
+                print(text)
+            generateSound(text, language=language, speaker=speaker)
         file_path = './output.wav'
         if use_emotion:
             file_path = './output.wav'

@@ -28,10 +28,7 @@ def int_or_str(text):
         return int(text)
     except ValueError:
         return text
-
-def playSound():
-    PlaySound(r'./output.wav', flags=1)
-    
+        
     
 def callback(indata, frames, time, status):
     """This is called (from a separate thread) for each audio block."""
@@ -221,16 +218,30 @@ def get_label(text, label):
 
 import os
 
-def generateSound(inputString, callback=play):
+def generateSound(inputString:str, language:str = 'Chinese', speaker:str =''):
     if '--escape' in sys.argv:
         escape = True
     else:
         escape = False
 
-    #model = input('Path of a VITS model: ')
-    #config = input('Path of a config file: ')
-    model = r"./vits/model/CN/model.pth"
-    config = r"./vits/model/CN/config.json"
+
+    with open("./vits/pretrained_models/info.json", "r", encoding="utf-8") as f:
+        models_info = json.load(f)
+    
+    if speaker in models_info.keys():
+        model = f"./vits/pretrained_models/{speaker}/{speaker}.pth"
+        config = f"./vits/pretrained_models/config.json"
+        speakerID = models_info[speaker]['sid']
+        #language = models_info[speaker]['language']
+    else:
+        print('No such character!!')
+
+    if language == 'Chinese':
+        inputString = f"[ZH]{inputString}[ZH]"
+    elif language == 'Japanese':
+        inputString = f"[JA]{inputString}[JA]"
+    else:
+        inputString = f"{inputString}"
     
     hps_ms = utils.get_hparams_from_file(config)
     n_speakers = hps_ms.data.n_speakers if 'n_speakers' in hps_ms.data.keys() else 0
@@ -238,6 +249,7 @@ def generateSound(inputString, callback=play):
     speakers = hps_ms.speakers if 'speakers' in hps_ms.keys() else ['0']
     use_f0 = hps_ms.data.use_f0 if 'use_f0' in hps_ms.data.keys() else False
     emotion_embedding = hps_ms.data.emotion_embedding if 'emotion_embedding' in hps_ms.data.keys() else False
+
 
     net_g_ms = SynthesizerTrn(
         n_symbols,
@@ -258,17 +270,10 @@ def generateSound(inputString, callback=play):
     if file_path.exists():
         # 删除文件
         file_path.unlink()
-    if callback is not None:
-        # audio = AudioSegment.from_wav(file_path)
-        # callback(audio)
-         pass
-    # print("text: ", text)
-    # print("play: ", play)
 
 
     def voice_conversion():
         audio_path = input('Path of an audio file to convert:\n')
-        print_speakers(speakers)
         audio = utils.load_audio_to_torch(
             audio_path, hps_ms.data.sampling_rate)
 
@@ -319,6 +324,7 @@ def generateSound(inputString, callback=play):
 
                     #print_speakers(speakers, escape)
                     #speaker_id = get_speaker_id('Speaker ID: ')
+                    
                     speaker_id = speakerID 
                     #out_path = input('Path to save: ')
                     out_path = "output.wav"
@@ -330,12 +336,15 @@ def generateSound(inputString, callback=play):
                         audio = net_g_ms.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=noise_scale,
                                                noise_scale_w=noise_scale_w, length_scale=length_scale)[0][0, 0].data.cpu().float().numpy()
 
+
                 elif choice == 'v':
                     audio, out_path = voice_conversion()
+                    print("choice = v", speaker_id)
 
                 write(out_path, hps_ms.data.sampling_rate, audio)
                 #print('Successfully saved!')
                 #ask_if_continue()
+        # has emotion embedding 
         else:
             import os
             import librosa
@@ -464,27 +473,3 @@ def generateSound(inputString, callback=play):
 
             #print('Successfully saved!')
             #ask_if_continue()
-
-# if __name__ == "__main__":
-#     # session_token = "你的api"
-#     # openai.api_key = str(session_token)
-#     #session_token = get_token()
-#     #api = ChatGPT(session_token)
-#     print(idmessage)
-#     speaker_id = input()
-#     while True:
-#         #question = voice_input()
-#         #resp = api.send_message(question)
-#         answer = chatgpt(question).replace('\n','')
-#         print("ChatGPT:")
-#         print(answer)
-#         answerG = answer
-#         answerG = "[ZH]" + answer + "[ZH]"
-#         with open(os.path.join('.', 'answer.txt'), 'w', encoding='utf-8') as f:
-#             f.write(answerG)
-#         # 将文本读取为字符串
-#         with open(os.path.join('.', 'answer.txt'), 'r', encoding='utf-8') as f:
-#             text = f.read()
-#         # 使用generateSound函数生成语音
-#         generateSound(text)
-#         playSound()

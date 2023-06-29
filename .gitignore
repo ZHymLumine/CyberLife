@@ -10,4 +10,5 @@ demo.py
 *.mp3
 *.wav
 vits/model/
+vits/pretrained_models
 temp.txt

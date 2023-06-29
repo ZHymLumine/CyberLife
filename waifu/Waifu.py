@@ -2,7 +2,7 @@ import json
 import os
 import waifu.Thoughts
 #from pycqBot.cqCode import face
-from waifu.Tools import make_message, message_period_to_now
+from waifu.Tools import make_message, message_period_to_now, translate
 from waifu.llm.Brain import Brain
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
@@ -250,7 +250,7 @@ class Waifu():
         summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
         if self.use_pinecone:
             #summary = self.translate2english(summary) # pinecone only support ASCII for id field
-            summary = self.translate(summary, 'zh', 'en', self.appid, self.secret_key)
+            summary = translate(summary, 'zh', 'en', self.appid, self.secret_key)
         print('结束总结')
         while len(self.chat_memory.messages) > 4:
             self.cut_memory()
@@ -258,25 +258,23 @@ class Waifu():
         logging.info(f'总结记忆 : {summary}')
     
     
-    def translate(self, query:str, from_lang:str, to_lang:str, appid:str, secret_key:str):
-        base_url = "https://fanyi-api.baidu.com/api/trans/vip/translate"
-        salt = "1435660288"
-        sign = appid + query + str(salt) + secret_key
-        sign = hashlib.md5(sign.encode()).hexdigest()
+    # def translate(self, query:str, from_lang:str, to_lang:str, appid:str, secret_key:str):
+    #     base_url = "https://fanyi-api.baidu.com/api/trans/vip/translate"
+    #     salt = "1435660288"
+    #     sign = appid + query + str(salt) + secret_key
+    #     sign = hashlib.md5(sign.encode()).hexdigest()
 
-        params = {
-            "q": query,
-            "from": from_lang,
-            "to": to_lang,
-            "appid": appid,
-            "salt": salt,
-            "sign": sign
-        }
+    #     params = {
+    #         "q": query,
+    #         "from": from_lang,
+    #         "to": to_lang,
+    #         "appid": appid,
+    #         "salt": salt,
+    #         "sign": sign
+    #     }
 
-        response = requests.get(base_url, params=params).json()
-
-
-        return response['trans_result'][-1]['dst']
+    #     response = requests.get(base_url, params=params).json()
+    #     return response['trans_result'][-1]['dst']
 
     def translate2english(self, summary:str):
         prompt = summary

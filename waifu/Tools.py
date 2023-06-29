@@ -2,6 +2,8 @@ import re
 import os
 import json
 import datetime
+import requests
+import hashlib
 from typing import List
 from dateutil.parser import parse
 from langchain.schema import HumanMessage, BaseMessage
@@ -98,3 +100,24 @@ def str2bool(text: str):
     else:
         print(colored(f'无法将 {text} 转换为布尔值，请检查配置文件！'))
         raise ValueError()
+
+
+def translate(query:str, from_lang:str, to_lang:str, appid:str, secret_key:str):
+        base_url = "https://fanyi-api.baidu.com/api/trans/vip/translate"
+        salt = "1435660288"
+        sign = appid + query + str(salt) + secret_key
+        sign = hashlib.md5(sign.encode()).hexdigest()
+
+        params = {
+            "q": query,
+            "from": from_lang,
+            "to": to_lang,
+            "appid": appid,
+            "salt": salt,
+            "sign": sign
+        }
+
+        response = requests.get(base_url, params=params).json()
+
+
+        return response['trans_result'][-1]['dst']
