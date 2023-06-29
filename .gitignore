@@ -9,4 +9,5 @@ demo.py
 /LOG
 *.mp3
 *.wav
-/vits-model
+vits/model/
+temp.txt

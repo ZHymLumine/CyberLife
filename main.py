@@ -18,6 +18,7 @@ from langchain.schema import (
     HumanMessage,
     SystemMessage
 )
+from vits.CNvoice import generateSound
 import time 
 import logging
 import os
@@ -59,6 +60,7 @@ voice 		 = config['TTS']['voice']
 pinecone_api = config['PINECONE']['api']
 pinecone_env = config['PINECONE']['environment']
 translate_platform = config['Translate']['platform']
+
 if translate_platform == 'Baidu':
      baidu_appid = config['Translate_Baidu']['baidu_appid']
      baidu_secretKey = config['Translate_Baidu']['baidu_secretKey']
@@ -80,6 +82,8 @@ if tts_model == 'Edge':
 	if api == '':
 		use_emotion = False
 
+vits_model = config['TTS_Vits']['model']
+speaker = config['TTS_Vits']['speaker']
 
 # LLM 模型配置
 model = config['LLM']['model']
@@ -117,7 +121,7 @@ if filename != '':
         
 
 stop = False
-send_voice = False
+#send_voice = False
 while not stop :
     content = input("You: ")
     if len(content) == 1 and content[0] == 'q':
@@ -131,7 +135,17 @@ while not stop :
     if send_voice:
         emotion = waifu.analyze_emotion(reply)
         print(emotion)
-        tts.speak(reply, emotion)
+
+        # tts
+        if tts_model != '':
+            print("tts is speaking")
+            tts.speak(reply, emotion)
+
+        # vits
+        if vits_model != '':
+            print('vits is speaking')
+            text = '[ZH]' + reply + '[ZH]'
+            generateSound(text, play)
         file_path = './output.wav'
         if use_emotion:
             file_path = './output.wav'
